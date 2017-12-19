@@ -12,21 +12,9 @@
 
 #define NETLINK_TEST (25)
 
-static dev_t devId;
-static struct class *cls = NULL;
 struct sock *nl_sk = NULL;
 
-static void
-hello_cleanup(void)
-{
-        netlink_kernel_release(nl_sk);
-        device_destroy(cls, devId);
-        class_destroy(cls);
-        unregister_chrdev_region(devId, 1);
-}
-
-static void
-netlink_send(int pid, uint8_t *message, int len)
+static void netlink_send(int pid, uint8_t *message, int len)
 {
         struct sk_buff *skb_1;
         struct nlmsghdr *nlh;
@@ -47,8 +35,7 @@ netlink_send(int pid, uint8_t *message, int len)
 		netlink_unicast(nl_sk, skb_1, pid, MSG_DONTWAIT);
 }
 
-static void
-netlink_input(struct sk_buff *__skb)
+static void netlink_input(struct sk_buff *__skb)
 {
         struct sk_buff *skb;
         char str[100];
@@ -77,28 +64,9 @@ netlink_input(struct sk_buff *__skb)
 
 static __init int netlink_init(void)
 {
-        int result;
         struct netlink_kernel_cfg nkc;
 
         printk(KERN_WARNING "netlink init start!\n");
-
-        //动态注册设备号
-        if(( result = alloc_chrdev_region(&devId, 0, 1, "stone-alloc-dev") ) != 0) {
-                printk(KERN_WARNING "register dev id error:%d\n", result);
-                goto err;
-        } else {
-                printk(KERN_WARNING "register dev id success!\n");
-        }
-        //动态创建设备节点
-        cls = class_create(THIS_MODULE, "stone-class");
-        if(IS_ERR(cls)) {
-                printk(KERN_WARNING "create class error!\n");
-                goto err;
-        }
-        if(device_create(cls, NULL, devId, "", "hello%d", 0) == NULL) {
-                printk(KERN_WARNING "create device error!\n");
-                goto err;
-        }
 
         //初始化netlink
         nkc.groups = 0;
@@ -117,13 +85,13 @@ static __init int netlink_init(void)
         printk(KERN_ALERT "netlink init success!\n");
         return 0;
 err:
-        hello_cleanup();
+        netlink_kernel_release(nl_sk);
         return -1;
 }
 
 static __exit void netlink_exit(void)
 {
-        hello_cleanup();
+        netlink_kernel_release(nl_sk);
         printk(KERN_WARNING "netlink exit!\n");
 }
 
