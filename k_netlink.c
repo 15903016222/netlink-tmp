@@ -58,7 +58,10 @@ static void netlink_input(struct sk_buff *__skb)
         memcpy(str, NLMSG_DATA(nlh), sizeof(str));
         printk(KERN_INFO "receive message (pid:%d):%s\n", nlh->nlmsg_pid, str);
         printk(KERN_INFO "space:%d\n", NLMSG_SPACE(0));
-		msleep (3000);
+
+        init_completion(&cmpl);
+        wait_for_completion_timeout(&cmpl, 3 * HZ);
+
         netlink_send(NLMSG_PID, NLMSG_DATA(nlh), nlh->nlmsg_len - NLMSG_SPACE(0));
         return;
 }
