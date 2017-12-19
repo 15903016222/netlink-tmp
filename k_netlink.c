@@ -11,6 +11,7 @@
 #include <net/sock.h>
 
 #define NETLINK_TEST (25)
+#define NLMSG_PID    (100)
 
 struct sock *nl_sk = NULL;
 
@@ -58,7 +59,7 @@ static void netlink_input(struct sk_buff *__skb)
         printk(KERN_INFO "receive message (pid:%d):%s\n", nlh->nlmsg_pid, str);
         printk(KERN_INFO "space:%d\n", NLMSG_SPACE(0));
 		msleep (3000);
-		netlink_send(nlh->nlmsg_pid, NLMSG_DATA(nlh), nlh->nlmsg_len - NLMSG_SPACE(0));
+        netlink_send(NLMSG_PID, NLMSG_DATA(nlh), nlh->nlmsg_len - NLMSG_SPACE(0));
         return;
 }
 
