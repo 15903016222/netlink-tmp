@@ -10,8 +10,9 @@
 #include <errno.h>
 
 #define NETLINK_TEST    (25)
-#define MAX_PAYLOAD     (1024)
+#define MAX_PAYLOAD     (64)
 #define TEST_PID        (100)
+#define DATA            ("HasData")
 
 int netlink_bind(int sock_fd)
 {
@@ -113,13 +114,8 @@ int netlink_recv_message(int sock_fd, unsigned char *message, int *len)
 int main(int argc, char **argv)
 {
     int sock_fd;
-    char buf[MAX_PAYLOAD];
+    char buf[MAX_PAYLOAD] = DATA;
     int len;
-
-    if (argc < 2) {
-        printf("%s <message> \n", argv[0]);
-        exit(EXIT_FAILURE);
-    }
 
 	// Create a socket
     sock_fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_TEST);
@@ -135,7 +131,7 @@ int main(int argc, char **argv)
     }
 
 	while (1) {
-		netlink_send_message(sock_fd, argv[1], strlen(argv[1]) + 1, 0, 0);
+		netlink_send_message(sock_fd, buf, strlen(buf) + 1, 0, 0);
 		if( netlink_recv_message(sock_fd, buf, &len) == 0 ) {
             printf("recv:%s len:%d\n", buf, len);
 		}

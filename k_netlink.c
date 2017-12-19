@@ -39,7 +39,7 @@ static void netlink_send(int pid, uint8_t *message, int len)
 static void netlink_input(struct sk_buff *__skb)
 {
         struct sk_buff *skb;
-        char str[100];
+        char str[64];
         struct nlmsghdr *nlh;
 		struct completion cmpl;
 
