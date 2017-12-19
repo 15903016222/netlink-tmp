@@ -42,7 +42,6 @@ static void netlink_input(struct sk_buff *__skb)
         char str[100];
         struct nlmsghdr *nlh;
 		struct completion cmpl;
-		int i = 10;
 
         if( !__skb ) {
                 return;
@@ -54,10 +53,12 @@ static void netlink_input(struct sk_buff *__skb)
         }
 
         nlh = nlmsg_hdr(skb);
+        if (NLMSG_PID != nlh->nlmsg_pid) {
+            return ;
+        }
+
         memset(str, 0, sizeof(str));
         memcpy(str, NLMSG_DATA(nlh), sizeof(str));
-        printk(KERN_INFO "receive message (pid:%d):%s\n", nlh->nlmsg_pid, str);
-        printk(KERN_INFO "space:%d\n", NLMSG_SPACE(0));
 
         init_completion(&cmpl);
         wait_for_completion_timeout(&cmpl, 3 * HZ);
