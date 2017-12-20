@@ -5,4 +5,4 @@ source /opt/yogurt/i.MX6-PD15.3.0/environment-setup-cortexa9hf-vfp-neon-phytec-l
 
 make
 
-$CC u_netlink.c -o u_netlink
+$CC u_netlink.c -o u_netlink -lpthread

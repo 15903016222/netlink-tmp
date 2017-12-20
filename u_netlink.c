@@ -8,6 +8,7 @@
 #include <linux/netlink.h>
 #include <linux/socket.h>
 #include <errno.h>
+#include <pthread.h>
 
 #define NETLINK_TEST    (25)
 #define MAX_PAYLOAD     (64)
@@ -111,6 +112,15 @@ int netlink_recv_message(int sock_fd, unsigned char *message, int *len)
     return 0;
 }
 
+void *thread_send_message(void *arg) {
+    int sock_fd = *(int *)arg;
+    int i = 10;
+    while (i--) {
+        sleep (3);
+        netlink_send_message(sock_fd, DATA, strlen(DATA) + 1, 0, 0);
+    }
+}
+
 int main(int argc, char **argv)
 {
     int sock_fd;
@@ -130,9 +140,18 @@ int main(int argc, char **argv)
         exit(EXIT_FAILURE);
     }
 
-	while (1) {
-		netlink_send_message(sock_fd, buf, strlen(buf) + 1, 0, 0);
-		if( netlink_recv_message(sock_fd, buf, &len) == 0 ) {
+    int res;
+    pthread_t a_thread;
+    res = pthread_create(&a_thread, NULL, thread_send_message, &sock_fd);
+    if (res != 0)
+    {
+        perror("Thread creation failed!");
+        exit(EXIT_FAILURE);
+    }
+
+//    netlink_send_message(sock_fd, buf, strlen(buf) + 1, 0, 0);
+    while (1) {
+        if( netlink_recv_message(sock_fd, buf, &len) == 0 ) {
             printf("recv:%s len:%d\n", buf, len);
 		}
 	}
