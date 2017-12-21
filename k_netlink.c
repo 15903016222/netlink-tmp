@@ -105,6 +105,7 @@ static void netlink_input(struct sk_buff *__skb)
 //    wait_for_completion_timeout(&cmpl, 1 * HZ);
 
 //    netlink_send(NLMSG_PID, NLMSG_DATA(nlh), nlh->nlmsg_len - NLMSG_SPACE(0));
+    kfre_skb (__skb);
     return;
 }
 
